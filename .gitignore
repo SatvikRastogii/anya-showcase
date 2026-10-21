@@ -1,0 +1,9 @@
+node_modules
+dist
+.vercel
+
+.vercel
+.env*
+tsconfig.tsbuildinfo
+!package.json
+!package-lock.json

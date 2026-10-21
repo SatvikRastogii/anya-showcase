@@ -1,0 +1,154 @@
+.hero {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  padding-top: 64px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--rule);
+}
+.hero > * { grid-column: 1; }
+
+.hero__stage { position: absolute; inset: 0; }
+
+/* Grainy colour clouds behind everything, in the references' blue-violet. */
+.hero {
+  --mesh-a: color-mix(in srgb, #6c63ff 34%, transparent);
+  --mesh-b: color-mix(in srgb, #c9a7f2 55%, transparent);
+  --mesh-c: color-mix(in srgb, #4f6bed 30%, transparent);
+  --grain: 0.9;
+}
+:root[data-theme="dark"] .hero {
+  --mesh-a: color-mix(in srgb, #5b4bff 45%, transparent);
+  --mesh-b: color-mix(in srgb, #2a1a6e 80%, transparent);
+  --mesh-c: color-mix(in srgb, #8a5cf6 40%, transparent);
+  --grain: 0.55;
+}
+.hero__mesh { position: absolute; inset: 0; overflow: hidden; }
+.hero__mesh::before {
+  content: ""; position: absolute; inset: -20%;
+  background:
+    radial-gradient(38% 26% at 30% 34%, var(--mesh-a), transparent 70%),
+    radial-gradient(30% 22% at 62% 52%, var(--mesh-b), transparent 70%),
+    radial-gradient(34% 24% at 82% 80%, var(--mesh-c), transparent 70%),
+    radial-gradient(28% 20% at 14% 82%, var(--mesh-b), transparent 70%);
+  filter: blur(48px);
+  animation: mesh-drift 38s ease-in-out infinite alternate;
+}
+/* Film grain: grey noise blended in, so it shows on the colour and vanishes on plain white. */
+.hero__mesh::after {
+  content: ""; position: absolute; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+  opacity: var(--grain);
+}
+@keyframes mesh-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(3%, -2%, 0) scale(1.05); }
+  100% { transform: translate3d(-3%, 2%, 0) scale(1.02); }
+}
+@media (prefers-reduced-motion: reduce) { .hero__mesh::before { animation: none; } }
+/* Quarter of a dotted globe tucked into the top-right corner, fading into the page. */
+.globe {
+  position: absolute; top: 0; right: 0;
+  width: min(58svh, 38vw); aspect-ratio: 1;
+  transform: translateX(10%);
+  opacity: 0.75;
+  -webkit-mask-image: radial-gradient(circle at 100% 20%, #000 60%, transparent 100%);
+  mask-image: radial-gradient(circle at 100% 20%, #000 60%, transparent 100%);
+  pointer-events: none;
+}
+.globe canvas { width: 100%; height: 100%; display: block; }
+@media (max-width: 700px) { .globe { width: 62vw; opacity: 0.5; } }
+
+.wavefield { position: absolute; inset: 43svh 0 -43svh; }
+.wavefield canvas { width: 100%; height: 100%; }
+.wavefield--static { width: 100%; height: 34%; top: 66%; opacity: 0.85; }
+
+/* Scope graticule behind the wave. */
+.hero__stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--rule) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--rule) 1px, transparent 1px);
+  background-size: calc(100% / 12) calc(100% / 8);
+  opacity: 0.4;
+  mask-image: radial-gradient(ellipse 70% 45% at 50% 86%, #000 30%, transparent 80%);
+  pointer-events: none;
+}
+
+.hero__voice {
+  position: relative;
+  grid-row: 2;
+  align-self: start;
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+  text-align: center;
+}
+/* .wrap resets padding, so these need the extra specificity. */
+.hero .hero__voice { padding-top: 0; margin-top: -9svh; }
+.hero .hero__copy { padding-top: clamp(32px, 7vh, 72px); }
+.hero__controls { display: grid; justify-items: center; gap: 22px; }
+/* "Hear Anya" as a living dotted orb with a play button in its middle. */
+.orb {
+  position: relative; display: grid; place-items: center;
+  width: clamp(150px, 20svh, 200px); aspect-ratio: 1; border-radius: 50%;
+  transition: transform 0.3s var(--ease);
+}
+.orb:hover { transform: scale(1.05); }
+.orb__gl, .orb__still { position: absolute; inset: -60%; pointer-events: none; }
+.orb__gl canvas { width: 100%; height: 100%; display: block; }
+.orb__still {
+  inset: 8%; border-radius: 50%;
+  background: radial-gradient(circle at 50% 55%, var(--ink-3) 0%, var(--dim) 60%, var(--signal) 80%, transparent 82%);
+  opacity: 0.85;
+}
+.orb__icon {
+  position: relative; width: 52px; height: 52px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--bone); color: var(--ink);
+  box-shadow: 0 8px 24px -8px rgb(0 0 0 / 0.45);
+  transition: background 0.2s, color 0.2s, transform 0.2s var(--ease);
+}
+.orb__icon svg { margin-left: 2px; }
+.orb.is-on .orb__icon { background: var(--signal); color: var(--ink); }
+.orb.is-on .orb__icon svg { margin-left: 0; }
+.orb:focus-visible { outline: 2px solid var(--signal); outline-offset: 6px; }
+
+.seg { display: inline-flex; padding: 3px; border: 1px solid var(--rule-2); border-radius: 999px; background: var(--ink); }
+.seg button { height: 40px; padding: 0 16px; border-radius: 999px; font-size: 15px; color: var(--dim); transition: background 0.2s, color 0.2s; }
+.seg button:hover { color: var(--bone); }
+.seg button.is-on { background: var(--ink-3); color: var(--bone); }
+
+
+.hero__copy {
+  position: relative;
+  grid-row: 1;
+  display: grid;
+  justify-items: start;
+  gap: 20px;
+}
+.hero__title {
+  font-size: clamp(34px, 4.2vw, 72px);
+  font-weight: 500;
+  line-height: 0.9;
+  letter-spacing: -0.055em;
+}
+.hero__line { display: block; overflow: hidden; padding-bottom: 0.06em; }
+.hero__line > span { display: block; }
+.hero__line + .hero__line { color: var(--dim); }
+
+.hero__aside { display: grid; justify-items: start; gap: 20px; }
+.hero__aside p { max-width: 44ch; }
+.hero__aside p { color: var(--dim); font-size: 16px; line-height: 1.5; }
+.hero__ctas { display: flex; flex-wrap: wrap; gap: 10px; }
+
+@media (max-width: 900px) {
+  .seg button { padding: 0 12px; }
+  /* Copy stacks full width here, so the orb can't tuck up beside it. */
+  .hero .hero__voice { margin-top: 32px; }
+}
